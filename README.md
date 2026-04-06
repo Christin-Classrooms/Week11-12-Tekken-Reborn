@@ -101,6 +101,7 @@ The images are publicly available here:
 |---|---|
 | Main App (port 8080) | [christinhumber/week9-10-main-app](https://hub.docker.com/r/christinhumber/week9-10-main-app) |
 | Battle Service (port 8081) | [christinhumber/week9-10-battle-service](https://hub.docker.com/r/christinhumber/week9-10-battle-service) |
+| Database (pre-seeded) | [christinhumber/week9-10-mysql-db](https://hub.docker.com/r/christinhumber/week9-10-mysql-db) |
 
 ### Step 1 — Create a `docker-compose.yml` file
 
@@ -109,7 +110,7 @@ Create a new **empty folder** anywhere on your computer, then create a file call
 ```yaml
 services:
   db:
-    image: mysql:8.0
+    image: christinhumber/week9-10-mysql-db:latest
     container_name: mysql-db
     restart: always
     environment:
@@ -207,7 +208,14 @@ Once the app is running, you can log in right away — **no registration needed*
 | `button_masher` | `QuarterCirclePunch!` | PLAYER |
 | `heihachi_jr` | `ThrowDadOffCliff` | PLAYER |
 | `lazy_gamer` | `PleaseLetMeWin` | PLAYER |
-| `nina_simp` | `BlondeAssassin99` | PLAYER |
+| `nina_simp` | `BestGamer123` | PLAYER |
+
+### 🍪 Pre-Baked Data (Advanced Concept)
+
+> **What's happening here?**
+> We've gone one step further! Instead of just giving you an empty database and letting the code fill it, we've "baked" the data directly into a custom MySQL image (`christinhumber/week9-10-mysql-db`).
+>
+> In real-world DevOps, this is how you ship "Demo Environments". You set up a perfect state, export it, and bake it into the image so new developers or customers get the full experience the second they type `docker compose up`.
 
 ### 💾 Data Persistence — A Key Docker Concept
 

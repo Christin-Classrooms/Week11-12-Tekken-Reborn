@@ -2,7 +2,8 @@ version: '3.8'
 
 services:
   db:
-    image: mysql:8.0
+    build: ./mysql-db
+    image: christinhumber/week9-10-mysql-db:latest
     container_name: mysql-db
     restart: always
     environment:
