@@ -17,6 +17,8 @@ This lab introduces you to **Docker** — a tool used in almost every real-world
 
 Docker lets you run applications inside **containers** — lightweight, isolated environments that include everything the app needs to run (Java, the database, dependencies, etc.). You don't need to install MySQL or Java on your machine; Docker handles all of that for you.
 
+Think of a container like a shipping container on a cargo ship — it packages everything needed for the app in one box, and it can run the same way on any machine.
+
 ---
 
 ## ✅ Prerequisites
@@ -33,24 +35,32 @@ Before you start, make sure you have:
 
 ## 🚀 Option A — Clone the Project and Build the Image Yourself
 
-This option shows you how a developer would run the full project locally using Docker.
+This option puts you in the shoes of a **developer** — you'll download the source code and use Docker to build and run the application yourself, just like you would if you joined a team.
 
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/Christin-Classrooms/Week9-10-Spring-Security-Lab.git
-cd Week9-10-Spring-Security-Lab
+git clone https://github.com/Christin-Classrooms/Week11-12-Tekken-Reborn.git
+cd Week11-12-Tekken-Reborn
 ```
 
-### Step 2 — Build the Docker Images
+> **What's happening?**
+> `git clone` downloads a full copy of the project from GitHub onto your computer. The `cd` command then moves you into that project folder so future commands run from the right place.
 
-This command reads the `Dockerfile` in each module and builds the images:
+---
+
+### Step 2 — Build the Docker Images
 
 ```bash
 docker compose build
 ```
 
-> ☕ This may take a few minutes the first time — it's downloading Java and all the project dependencies.
+> **What's happening?**
+> Docker reads the `Dockerfile` files inside the project and uses them as a recipe to build **images** — think of an image as a snapshot of the app and everything it needs (Java runtime, compiled code, etc.). This step compiles the Spring Boot apps inside Docker.
+>
+> ☕ This may take **3–5 minutes** the first time — it's downloading Java and resolving all the project dependencies. Subsequent builds are much faster because of caching.
+
+---
 
 ### Step 3 — Start the Application
 
@@ -58,7 +68,15 @@ docker compose build
 docker compose up -d
 ```
 
-The `-d` flag means **detached** — it runs in the background.
+> **What's happening?**
+> This command takes the images you just built and starts them as running **containers**. The `-d` flag stands for **detached**, meaning the containers run in the background and you get your terminal back.
+>
+> Docker Compose will start 3 containers in the right order:
+> 1. **`mysql-db`** — the database (starts first, others wait for it to be healthy)
+> 2. **`main-app`** — the main TekkenReborn web app on port `8080`
+> 3. **`battle-service-app`** — the battle microservice on port `8081`
+
+---
 
 ### Step 4 — Access the App
 
@@ -68,15 +86,18 @@ Open your browser and go to:
 http://localhost:8080
 ```
 
+> **What's happening?**
+> Your browser is connecting to port `8080` on your machine, which Docker has mapped to the `main-app` container. The app is fully running inside Docker — you don't need Java installed locally at all.
+
 ---
 
 ## 🐋 Option B — Pull from Docker Hub (No Code Required)
 
-This option shows you how a user would run an app they've never seen before, using only a public Docker image.
+This option puts you in the shoes of an **end user** — you'll run the application using pre-built images published to Docker Hub, without ever touching the source code. This is how most production deployments work in real life.
 
 ### Step 1 — Create a `docker-compose.yml` file
 
-Create a new folder anywhere on your computer, then create a file called `docker-compose.yml` inside it with this content:
+Create a new **empty folder** anywhere on your computer, then create a file called `docker-compose.yml` inside it with the following content:
 
 ```yaml
 services:
@@ -128,16 +149,34 @@ services:
       FIGHTER_SERVICE_URL: http://app:8080/api/fighters
 ```
 
-### Step 2 — Pull and Start Everything
+> **What's happening?**
+> This file is a **blueprint** that tells Docker what services to run, what images to use, what ports to expose, and how the containers should talk to each other. Notice there's no source code — Docker will download the images from Docker Hub automatically in the next step.
 
-In the same folder as your `docker-compose.yml`, run:
+---
+
+### Step 2 — Pull the Images
 
 ```bash
 docker compose pull
+```
+
+> **What's happening?**
+> This command downloads the pre-built images from **Docker Hub** (Docker's public image registry, similar to GitHub but for Docker images). After this step, everything the app needs is on your machine — no cloning, no compiling.
+
+---
+
+### Step 3 — Start Everything
+
+```bash
 docker compose up -d
 ```
 
-### Step 3 — Access the App
+> **What's happening?**
+> Same as Option A Step 3 — Docker starts the 3 containers (database, main app, battle service) in the correct order in the background.
+
+---
+
+### Step 4 — Access the App
 
 ```
 http://localhost:8080
@@ -149,13 +188,14 @@ http://localhost:8080
 
 Once the app is running:
 
-1. Go to `http://localhost:8080`
-2. You will be redirected to the login page
-3. Register a new account (you'll be assigned the `PLAYER` role)
-4. Or log in with the admin account:
+1. Go to `http://localhost:8080` — you'll be redirected to the login page
+2. **Register** a new account (you'll automatically be assigned the `PLAYER` role)
+3. Or log in with the pre-seeded **Admin** account:
    - **Username:** `admin`
    - **Password:** `admin123`
-5. Navigate to the **Battle** page and select two fighters to fight
+4. Navigate to the **Battle** page from the navbar
+5. Select two fighters from the dropdowns and click **FIGHT!**
+6. You should see a battle result page showing the winner
 
 ---
 
@@ -165,34 +205,43 @@ You must submit **4 screenshots**. Please name them clearly.
 
 | # | What to capture | Suggested filename |
 |---|---|---|
-| 1 | Docker Desktop (or `docker ps` output in terminal) showing all 3 containers running (`mysql-db`, `main-app`, `battle-service-app`) | `screenshot-1-containers-running.png` |
+| 1 | Docker Desktop **or** `docker ps` output in your terminal — showing all 3 containers running (`mysql-db`, `main-app`, `battle-service-app`) | `screenshot-1-containers-running.png` |
 | 2 | The app open in your browser at `http://localhost:8080` — showing the login or home page | `screenshot-2-app-running.png` |
 | 3 | The **battle result page** — after selecting two fighters and clicking FIGHT | `screenshot-3-battle-result.png` |
-| 4 | After stopping and deleting the containers — `docker ps` output showing **no containers running** | `screenshot-4-containers-stopped.png` |
+| 4 | `docker ps` output showing **no containers running** after cleanup (see next section) | `screenshot-4-containers-stopped.png` |
 
 ---
 
 ## 🛑 Shutting Down and Cleaning Up
 
-When you're done, stop and remove all containers:
+When you're done taking your screenshots, shut everything down properly.
+
+### Stop and remove all containers
 
 ```bash
 docker compose down
 ```
 
-To also remove the stored database data (volume):
+> **What's happening?**
+> This stops all running containers and removes them. The images are still on your machine (so you could start again quickly), but the containers are gone.
+
+### Optional — also delete the stored database
 
 ```bash
 docker compose down -v
 ```
 
-After running this, verify that the containers are gone:
+> **What's happening?**
+> The `-v` flag also removes the **volume** — the stored database data. This gives you a completely clean slate, as if you never ran the app.
+
+### Verify everything is stopped
 
 ```bash
 docker ps
 ```
 
-You should see an empty list — take **Screenshot 4** now.
+> **What's happening?**
+> `docker ps` lists all **currently running** containers. After shutting down, this list should be empty. Take **Screenshot 4** here.
 
 ---
 
@@ -208,8 +257,9 @@ Submit your 4 screenshots on **Blackboard** under the Optional Docker Lab assign
 
 | Problem | Solution |
 |---|---|
-| `docker: command not found` | Docker Desktop is not installed or not started — open Docker Desktop first |
+| `docker: command not found` | Docker Desktop is not installed or not running — open Docker Desktop first |
 | Port 8080 already in use | Another app is using port 8080. Stop it, or change `"8080:8080"` to `"8082:8080"` in the compose file |
-| App shows a database error | Wait 30 seconds and refresh — MySQL takes a moment to initialize |
+| App shows a database error on first load | Wait 20–30 seconds and refresh — MySQL takes a moment to fully initialize |
 | Login doesn't work after registering | Make sure you're using the exact username and password you registered with |
 | Containers stop immediately | Run `docker compose logs` to see error details |
+| Battle says "service unavailable" | Wait another 30 seconds — the battle-service may still be starting up |
