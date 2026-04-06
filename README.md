@@ -95,6 +95,13 @@ http://localhost:8080
 
 This option puts you in the shoes of an **end user** — you'll run the application using pre-built images published to Docker Hub, without ever touching the source code. This is how most production deployments work in real life.
 
+The images are publicly available here:
+
+| Service | Docker Hub Link |
+|---|---|
+| Main App (port 8080) | [christinhumber/week9-10-main-app](https://hub.docker.com/r/christinhumber/week9-10-main-app) |
+| Battle Service (port 8081) | [christinhumber/week9-10-battle-service](https://hub.docker.com/r/christinhumber/week9-10-battle-service) |
+
 ### Step 1 — Create a `docker-compose.yml` file
 
 Create a new **empty folder** anywhere on your computer, then create a file called `docker-compose.yml` inside it with the following content:
