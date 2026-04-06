@@ -193,16 +193,41 @@ http://localhost:8080
 
 ## 🎮 Using the Application
 
-Once the app is running:
+Once the app is running, you can log in right away — **no registration needed**. The app comes with pre-seeded accounts loaded automatically on startup.
+
+### 🔐 Pre-Seeded Accounts
+
+> **What's happening here?**
+> When the app starts, a `DataLoader` runs and inserts these accounts into the database automatically. This is a common pattern in real applications to ensure default data always exists.
+
+| Username | Password | Role |
+|---|---|---|
+| `admin` | `admin123` | ADMIN — full access |
+| `kazuya_fan` | `ILovePain123` | PLAYER |
+| `button_masher` | `QuarterCirclePunch!` | PLAYER |
+| `heihachi_jr` | `ThrowDadOffCliff` | PLAYER |
+| `lazy_gamer` | `PleaseLetMeWin` | PLAYER |
+| `nina_simp` | `BlondeAssassin99` | PLAYER |
+
+### 💾 Data Persistence — A Key Docker Concept
+
+> **This is important!** Docker uses **volumes** to persist data. Even if you stop and restart the containers, the database data (players, fighters, battles) will still be there — because it's stored in a volume on your machine, not inside the container itself.
+>
+> Try this to see it in action:
+> 1. Log in and trigger a battle
+> 2. Stop the containers: `docker compose stop`
+> 3. Start them again: `docker compose start`
+> 4. Log back in — your battle history is still there! ✅
+>
+> **To wipe all data**, you need to explicitly remove the volume: `docker compose down -v`
+
+### Steps to Use the App
 
 1. Go to `http://localhost:8080` — you'll be redirected to the login page
-2. **Register** a new account (you'll automatically be assigned the `PLAYER` role)
-3. Or log in with the pre-seeded **Admin** account:
-   - **Username:** `admin`
-   - **Password:** `admin123`
-4. Navigate to the **Battle** page from the navbar
-5. Select two fighters from the dropdowns and click **FIGHT!**
-6. You should see a battle result page showing the winner
+2. Log in with any account from the table above
+3. Navigate to the **Battle** page from the navbar
+4. Select two fighters from the dropdowns and click **FIGHT!**
+5. You should see a battle result page showing the winner
 
 ---
 

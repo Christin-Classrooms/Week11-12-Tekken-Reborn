@@ -29,13 +29,33 @@ public class DataLoader implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         // Seed Admin Player if missing
-        if (playerRepository.count() == 0 || playerRepository.findByName("admin") == null) {
+        if (playerRepository.findByName("admin") == null) {
             Player admin = new Player();
             admin.setName("admin");
             admin.setEmail("admin@example.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setRole("ADMIN");
             playerRepository.save(admin);
+        }
+
+        // Seed Dummy Players if missing
+        List<String[]> dummyPlayers = List.of(
+            new String[]{"kazuya_fan",    "kazuya_fan@tekken.com",    "ILovePain123"},
+            new String[]{"button_masher", "masher@tekken.com",        "QuarterCirclePunch!"},
+            new String[]{"heihachi_jr",   "heihachi@mishima.com",     "ThrowDadOffCliff"},
+            new String[]{"lazy_gamer",    "couch@potato.com",         "PleaseLetMeWin"},
+            new String[]{"nina_simp",     "nina4ever@tekken.com",     "BlondeAssassin99"}
+        );
+
+        for (String[] data : dummyPlayers) {
+            if (playerRepository.findByName(data[0]) == null) {
+                Player p = new Player();
+                p.setName(data[0]);
+                p.setEmail(data[1]);
+                p.setPassword(passwordEncoder.encode(data[2]));
+                p.setRole("PLAYER");
+                playerRepository.save(p);
+            }
         }
 
         // Seed Initial Fighters if missing
