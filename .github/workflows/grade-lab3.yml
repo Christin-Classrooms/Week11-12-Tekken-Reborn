@@ -1,0 +1,199 @@
+name: Lab 3 - Grading
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  grade:
+    name: Auto-Grade Submission
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
+
+      # ── STEP 1: Fighter Entity ─────────────────────────────────────────────
+      - name: Check Fighter has @Entity
+        id: check_entity
+        run: |
+          FILE=$(find . -name "Fighter.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ Fighter.java not found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -q "@Entity" "$FILE"; then
+            echo "result=✅ @Entity found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ @Entity annotation missing on Fighter class" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Fighter has @Id and @GeneratedValue
+        id: check_id
+        run: |
+          FILE=$(find . -name "Fighter.java" | head -1)
+          if grep -q "@Id" "$FILE" && grep -q "@GeneratedValue" "$FILE"; then
+            echo "result=✅ @Id and @GeneratedValue found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ Missing @Id or @GeneratedValue on Fighter id field" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Fighter retains validation annotations
+        id: check_validation
+        run: |
+          FILE=$(find . -name "Fighter.java" | head -1)
+          if grep -qE "@NotBlank|@NotNull|@Min|@Max|@DecimalMin|@DecimalMax" "$FILE"; then
+            echo "result=✅ Validation annotations still present" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ Validation annotations seem to have been removed from Fighter" >> $GITHUB_OUTPUT
+          fi
+
+      # ── STEP 2: FighterRepository ──────────────────────────────────────────
+      - name: Check FighterRepository exists
+        id: check_repo_exists
+        run: |
+          FILE=$(find . -path "*/repository/FighterRepository.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterRepository.java not found inside a repository package" >> $GITHUB_OUTPUT
+          else
+            echo "result=✅ FighterRepository.java found in repository package" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check FighterRepository extends JpaRepository
+        id: check_repo_extends
+        run: |
+          FILE=$(find . -name "FighterRepository.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterRepository.java not found — skipping" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -q "JpaRepository" "$FILE"; then
+            echo "result=✅ Extends JpaRepository" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ FighterRepository does not extend JpaRepository" >> $GITHUB_OUTPUT
+          fi
+
+      # ── STEP 3: FighterService ─────────────────────────────────────────────
+      - name: Check FighterService uses repository, not a List
+        id: check_service
+        run: |
+          FILE=$(find . -name "FighterService.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterService.java not found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "new ArrayList|List<Fighter>" "$FILE"; then
+            echo "result=❌ FighterService still uses a plain List instead of the repository" >> $GITHUB_OUTPUT
+          elif grep -q "FighterRepository" "$FILE"; then
+            echo "result=✅ FighterService injects and uses FighterRepository" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ FighterRepository not found in FighterService" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check FighterService has addFighter method
+        id: check_service_add
+        run: |
+          FILE=$(find . -name "FighterService.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterService.java not found — skipping" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "void addFighter|Fighter addFighter|save\(" "$FILE"; then
+            echo "result=✅ addFighter method found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ addFighter method missing or not delegating to repository save()" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check FighterService has getAllFighters method
+        id: check_service_getall
+        run: |
+          FILE=$(find . -name "FighterService.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterService.java not found — skipping" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "getAllFighters|findAll\(" "$FILE"; then
+            echo "result=✅ getAllFighters method found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ getAllFighters method missing or not delegating to repository findAll()" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check FighterService has getFighterById method
+        id: check_service_getbyid
+        run: |
+          FILE=$(find . -name "FighterService.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterService.java not found — skipping" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "getFighterById|findById\(" "$FILE"; then
+            echo "result=✅ getFighterById method found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ getFighterById method missing or not delegating to repository findById()" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check FighterService has deleteFighter method
+        id: check_service_delete
+        run: |
+          FILE=$(find . -name "FighterService.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterService.java not found — skipping" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "deleteFighter|deleteById\(" "$FILE"; then
+            echo "result=✅ deleteFighter method found" >> $GITHUB_OUTPUT
+          else
+            echo "result=❌ deleteFighter method missing or not delegating to repository deleteById()" >> $GITHUB_OUTPUT
+          fi
+
+      # ── STEP 4: Controllers ────────────────────────────────────────────────
+      - name: Check FighterController no longer uses a plain List
+        id: check_fighter_controller
+        run: |
+          FILE=$(find . -name "FighterController.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ FighterController.java not found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "new ArrayList|List<Fighter>" "$FILE"; then
+            echo "result=❌ FighterController still has a plain List" >> $GITHUB_OUTPUT
+          else
+            echo "result=✅ FighterController no longer uses a plain List" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check CreateFighterController no longer uses a plain List
+        id: check_create_controller
+        run: |
+          FILE=$(find . -name "CreateFighterController.java" | head -1)
+          if [ -z "$FILE" ]; then
+            echo "result=❌ CreateFighterController.java not found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          if grep -qE "new ArrayList|List<Fighter>" "$FILE"; then
+            echo "result=❌ CreateFighterController still has a plain List" >> $GITHUB_OUTPUT
+          else
+            echo "result=✅ CreateFighterController no longer uses a plain List" >> $GITHUB_OUTPUT
+          fi
+
+      # ── SUMMARY ───────────────────────────────────────────────────────────
+      - name: Write Grading Summary
+        run: |
+          echo "# 📋 Lab 3 — Grading Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Fighter @Entity | ${{ steps.check_entity.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fighter @Id + @GeneratedValue | ${{ steps.check_id.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fighter Validation Annotations | ${{ steps.check_validation.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterRepository Exists | ${{ steps.check_repo_exists.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterRepository extends JpaRepository | ${{ steps.check_repo_extends.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterService Uses Repository | ${{ steps.check_service.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterService — addFighter | ${{ steps.check_service_add.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterService — getAllFighters | ${{ steps.check_service_getall.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterService — getFighterById | ${{ steps.check_service_getbyid.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterService — deleteFighter | ${{ steps.check_service_delete.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FighterController Refactored | ${{ steps.check_fighter_controller.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CreateFighterController Refactored | ${{ steps.check_create_controller.outputs.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> Results visible to instructor only via the Actions tab." >> $GITHUB_STEP_SUMMARY
