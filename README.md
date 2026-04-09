@@ -303,3 +303,4 @@ Submit your 4 screenshots on **Blackboard** under the Optional Docker Lab assign
 | Login doesn't work after registering | Make sure you're using the exact username and password you registered with |
 | Containers stop immediately | Run `docker compose logs` to see error details |
 | Battle says "service unavailable" | Wait another 30 seconds — the battle-service may still be starting up |
+Lab 7 completed using Docker Compose.
